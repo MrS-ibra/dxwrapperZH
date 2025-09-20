@@ -3,7 +3,7 @@ name: CI
 on:
   push:
   pull_request:
-    branches: ["master"]
+    branches: [ "master" ]
   workflow_dispatch:
 
 permissions:
@@ -22,28 +22,33 @@ jobs:
         platform: [Win32]
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - uses: microsoft/setup-msbuild@v1
-
-      - uses: Trass3r/setup-cpp@master
-
-      - name: Build
-        run: msbuild /m \
-          /p:Configuration=${{ matrix.config }} \
-          /p:Platform=${{ matrix.platform }} \
-          dxwrapper.sln
-
-      - name: Upload DX8 Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dx8 game binaries
-          path: bin/${{ matrix.config }}/dx8/*
-
-      - name: Upload DX9 Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dx9 game binaries
-          path: bin/${{ matrix.config }}/dx9/*
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - uses: microsoft/setup-msbuild@v1
+    - uses: Trass3r/setup-cpp@master
+    - name: Build
+      run: msbuild /m /p:Configuration=${{ matrix.config }} /p:Platform=${{ matrix.platform }} dxwrapper.sln
+    - name: Upload DX7 Artifacts
+      if: ${{ matrix.config == 'Release' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: dx7 game binaries
+        path: bin/${{ matrix.config }}/dx7/*
+    - name: Upload DX8 Artifacts
+      if: ${{ matrix.config == 'Release' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: dx8 game binaries
+        path: bin/${{ matrix.config }}/dx8/*
+    - name: Upload DX9 Artifacts
+      if: ${{ matrix.config == 'Release' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: dx9 game binaries
+        path: bin/${{ matrix.config }}/dx9/*
+    - name: Upload Matrix Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.config }} binaries
+        path: bin/${{ matrix.config }}/*
